@@ -24,7 +24,7 @@ public class LaunchSettings extends UiAutomatorTestCase {
 
 	private static final String SEND_FILE = "random_seed_concat.bin";
 	private static final int NB_FILES = 2;
-	private static final int MAX_CHECK = 2 * 60;
+	private static int MAX_TIME = 2 * 60;
 
 	private void uploadFile(String fileName) throws UiObjectNotFoundException {
 		// Remove old file
@@ -69,7 +69,7 @@ public class LaunchSettings extends UiAutomatorTestCase {
 		UiObject uploadingFile = Utils.findLayoutInList(fileName,
 				android.widget.FrameLayout.class.getName(), 0, ID_LIST_DROPBOX,
 				ID_TITLE_DROPBOX, true);
-		for (int i = 0; i < MAX_CHECK; i++) {
+		for (int i = 0; i < MAX_TIME; i++) {
 			UiObject progressBar = uploadingFile.getChild(new UiSelector()
 					.resourceId(ID_PROGRESSBAR));
 			if (progressBar == null || !progressBar.exists())
@@ -87,9 +87,24 @@ public class LaunchSettings extends UiAutomatorTestCase {
 		sleep(1000);
 
 		for (int i = 0; i < NB_FILES; i++) {
+			// create file with a few random
 			Utils.createFile(SEND_FILE);
+
+			// upload file and wait
+			long start = System.currentTimeMillis();
 			uploadFile(SEND_FILE);
 			assertTrue("Upload: timeout", waitForEndUpload(SEND_FILE));
+
+			// check if we have enough time for a new upload
+			int elapsedTimeSec = (int) ((System.currentTimeMillis() - start) / 1000);
+			System.out.println("Elapsed time: " + elapsedTimeSec + " - "
+					+ MAX_TIME);
+			if (MAX_TIME > 2 * elapsedTimeSec)
+				MAX_TIME -= elapsedTimeSec;
+			else if (i + 1 < NB_FILES) {
+				System.out.println("No more time for a new test...");
+				return;
+			}
 		}
 	}
 }
