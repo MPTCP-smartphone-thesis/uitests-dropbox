@@ -12,6 +12,9 @@
 bin/
 gen/
 
+# Sensitive files
+src/login/
+
 # Gradle files
 .gradle/
 build/
