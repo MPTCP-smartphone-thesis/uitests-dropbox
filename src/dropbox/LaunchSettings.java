@@ -22,7 +22,7 @@ public class LaunchSettings extends UiAutomatorTestCase {
 	private static final String ID_BUTTON_UPLOAD = "com.dropbox.android:id/bottom_bar_ok_button";
 	private static final String ID_PROGRESSBAR = "com.dropbox.android:id/filelist_status_progressbar";
 
-	private static final String SEND_FILE = "random_seed_concat.bin";
+	private static final String SEND_FILE = "a_random_seed_concat.bin";
 	private static final int NB_FILES = 2;
 	private static int MAX_TIME = 2 * 60;
 
