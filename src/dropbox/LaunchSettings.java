@@ -87,11 +87,11 @@ public class LaunchSettings extends UiAutomatorTestCase {
 		sleep(1000);
 
 		for (int i = 0; i < NB_FILES; i++) {
+			long start = System.currentTimeMillis();
 			// create file with a few random
 			Utils.createFile(SEND_FILE);
 
 			// upload file and wait
-			long start = System.currentTimeMillis();
 			uploadFile(SEND_FILE);
 			assertTrue("Upload: timeout", waitForEndUpload(SEND_FILE));
 
