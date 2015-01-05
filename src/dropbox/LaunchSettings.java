@@ -32,14 +32,25 @@ public class LaunchSettings extends UiAutomatorTestCase {
 				android.widget.LinearLayout.class.getName(), 2,
 				ID_LIST_DROPBOX, ID_TITLE_DROPBOX, true);
 		if (oldFile != null && oldFile.exists()) {
-			// long press for the menu: longClick() doesn't work
-			Utils.longPress(oldFile);
-			// menu, find delete
-			Utils.findLayoutInList(TEXT_DELETE,
-					android.widget.LinearLayout.class.getName(), 0,
-					ID_LIST_DIALOG, null, true).clickAndWaitForNewWindow();
+			int i;
+			// init can take a few time, retry if longPress doesn't work
+			for (i = 0; i < 10; i++) {
+				// long press for the menu: longClick() doesn't work
+				Utils.longPress(oldFile);
+				// menu, find delete
+				UiObject delete = Utils.findLayoutInList(TEXT_DELETE,
+						android.widget.LinearLayout.class.getName(), 0,
+						ID_LIST_DIALOG, null, true);
+				if (delete != null && delete.exists()) {
+					delete.clickAndWaitForNewWindow();
+					break;
+				}
+				sleep(500);
+
+			}
 			// confirmation
-			Utils.clickAndWaitForNewWindow(ID_BUTTON_DELETE);
+			if (i != 10) // avoid error
+				Utils.clickAndWaitForNewWindow(ID_BUTTON_DELETE);
 		}
 
 		// Top-right Menu
