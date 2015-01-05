@@ -77,13 +77,18 @@ public class LaunchSettings extends UiAutomatorTestCase {
 
 	private boolean waitForEndUpload(String fileName)
 			throws UiObjectNotFoundException {
-		sleep(2000);
+		sleep(5000);
 		UiObject uploadingFile = Utils.findLayoutInList(fileName,
 				android.widget.FrameLayout.class.getName(), 0, ID_LIST_DROPBOX,
 				ID_TITLE_DROPBOX, true);
-		for (int i = 2; i < MAX_TIME + 30; i++) {
-			UiObject progressBar = uploadingFile.getChild(new UiSelector()
-					.resourceId(ID_PROGRESSBAR));
+		for (int i = 5; i < MAX_TIME + 30; i++) {
+			UiObject progressBar;
+			// Fallback if file not found, find the first ProgressBar
+			if (uploadingFile == null || !uploadingFile.exists())
+				progressBar = Utils.getObjectWithId(ID_PROGRESSBAR);
+			else
+				progressBar = uploadingFile.getChild(new UiSelector()
+						.resourceId(ID_PROGRESSBAR));
 			if (progressBar == null || !progressBar.exists())
 				return true;
 			sleep(1000);
