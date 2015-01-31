@@ -1,6 +1,7 @@
 package dropbox;
 
 import utils.Utils;
+import android.graphics.Rect;
 
 import com.android.uiautomator.core.UiObject;
 import com.android.uiautomator.core.UiObjectNotFoundException;
@@ -21,12 +22,14 @@ public class LaunchSettings extends UiAutomatorTestCase {
 	private static final String ID_TITLE_FILE = "com.dropbox.android:id/localitem_name";
 	private static final String ID_BUTTON_UPLOAD = "com.dropbox.android:id/bottom_bar_ok_button";
 	private static final String ID_PROGRESSBAR = "com.dropbox.android:id/filelist_status_progressbar";
+	private static final String ID_BUTTON_QACTION = "com.dropbox.android:id/filelist_quickaction_button";
 
 	private static final String SEND_FILE = "a_random_seed_concat.bin";
 	private static int NB_FILES = 2;
 	private static int MAX_TIME = 2 * 60;
 
-	private void uploadFile(String fileName) throws UiObjectNotFoundException {
+	private void removePreviousFile(String fileName)
+			throws UiObjectNotFoundException {
 		// Remove old file
 		UiObject oldFile = Utils.findLayoutInList(fileName,
 				android.widget.LinearLayout.class.getName(), 2,
@@ -52,7 +55,9 @@ public class LaunchSettings extends UiAutomatorTestCase {
 			if (i != 10) // avoid error
 				Utils.clickAndWaitForNewWindow(ID_BUTTON_DELETE);
 		}
+	}
 
+	private void uploadFile(String fileName) throws UiObjectNotFoundException {
 		// Top-right Menu
 		Utils.getObjectWithDescription(DESC_MORE_OPTIONS)
 				.clickAndWaitForNewWindow();
@@ -75,7 +80,7 @@ public class LaunchSettings extends UiAutomatorTestCase {
 		Utils.clickAndWaitForNewWindow(ID_BUTTON_UPLOAD);
 	}
 
-	private boolean waitForEndUpload(String fileName)
+	private UiObject waitForEndUpload(String fileName)
 			throws UiObjectNotFoundException {
 		sleep(5000);
 		UiObject uploadingFile = Utils.findLayoutInList(fileName,
@@ -90,8 +95,26 @@ public class LaunchSettings extends UiAutomatorTestCase {
 				progressBar = uploadingFile.getChild(new UiSelector()
 						.resourceId(ID_PROGRESSBAR));
 			if (progressBar == null || !progressBar.exists())
-				return true;
+				return null;
 			sleep(1000);
+		}
+		return uploadingFile;
+	}
+
+	private boolean cancelUpload(UiObject uploadingFile, String fileName)
+			throws UiObjectNotFoundException {
+		// menu, find cancel
+		UiObject fileLayout = Utils.findLayoutInList(fileName,
+				android.widget.LinearLayout.class.getName(), 2,
+				ID_LIST_DROPBOX, ID_TITLE_DROPBOX, true);
+		if (fileLayout != null && fileLayout.exists()) {
+			fileLayout.getChild(new UiSelector().resourceId(ID_BUTTON_QACTION))
+					.click();
+			sleep(1000);
+			Rect bounds = fileLayout.getBounds();
+			getUiDevice().click(bounds.width() / 2,
+					bounds.bottom + bounds.height() / 4);
+			return true;
 		}
 		return false;
 	}
@@ -110,10 +133,20 @@ public class LaunchSettings extends UiAutomatorTestCase {
 			long start = System.currentTimeMillis();
 			// create file with a few random
 			Utils.createFile(SEND_FILE);
+			removePreviousFile(SEND_FILE);
 
 			// upload file and wait
 			uploadFile(SEND_FILE);
-			assertTrue("Upload: timeout", waitForEndUpload(SEND_FILE));
+			UiObject uploadingFile = waitForEndUpload(SEND_FILE);
+			if (uploadingFile != null) {
+				System.out.println("Timeout, cancel upload");
+				// to avoid uploading a file during other tests
+				assertTrue("Not able to cancel upload",
+						cancelUpload(uploadingFile, SEND_FILE));
+				// Error if no file uploaded
+				assertTrue("Not able to upload any file", i > 0);
+				break;
+			}
 
 			// check if we have enough time for a new upload
 			int elapsedTimeSec = (int) ((System.currentTimeMillis() - start) / 1000);
@@ -123,7 +156,7 @@ public class LaunchSettings extends UiAutomatorTestCase {
 				MAX_TIME -= elapsedTimeSec;
 			else if (i + 1 < NB_FILES) {
 				System.out.println("No more time for a new test...");
-				return;
+				break;
 			}
 		}
 	}
