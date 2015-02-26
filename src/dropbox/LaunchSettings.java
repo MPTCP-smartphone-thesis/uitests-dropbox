@@ -86,7 +86,7 @@ public class LaunchSettings extends UiAutomatorTestCase {
 		UiObject uploadingFile = Utils.findLayoutInList(fileName,
 				android.widget.FrameLayout.class.getName(), 0, ID_LIST_DROPBOX,
 				ID_TITLE_DROPBOX, true);
-		for (int i = 5; i < MAX_TIME + 30; i++) {
+		for (int i = 5; i < MAX_TIME + 10; i++) {
 			UiObject progressBar;
 			// Fallback if file not found, find the first ProgressBar
 			if (uploadingFile == null || !uploadingFile.exists())
