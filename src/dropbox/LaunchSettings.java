@@ -25,7 +25,7 @@ public class LaunchSettings extends UiAutomatorTestCase {
 	private static final String ID_BUTTON_QACTION = "com.dropbox.android:id/filelist_quickaction_button";
 
 	private static final String SEND_FILE = "a_random_seed_concat.bin";
-	private static int NB_FILES = 2;
+	private static int NB_FILES = 1;
 	private static int MAX_TIME = 2 * 60;
 
 	private void removePreviousFile(String fileName)
