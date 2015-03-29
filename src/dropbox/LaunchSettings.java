@@ -125,7 +125,7 @@ public class LaunchSettings extends UiAutomatorTestCase {
 						"com.dropbox.android",
 						"com.dropbox.android.activity.DropboxBrowser"));
 		double multTime = Utils.getMultTime(this);
-		double maxTime = Utils.getDoubleFromParam(this, "max-time");
+		double maxTime = Utils.getDoubleFromParam(this, "mult-max-time");
 		NB_FILES = Math.max(1, (int) (NB_FILES * multTime));
 		MAX_TIME = Math.max(1, (int) (MAX_TIME * multTime * maxTime));
 		sleep(1000);
